@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light mode base */
+body {
+  @apply bg-cream text-wood-700 font-sans transition-colors duration-300;
+}
+
+/* Dark mode base */
+.dark body {
+  @apply bg-dark-bg text-dark-text;
+}
