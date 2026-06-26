@@ -15,12 +15,15 @@ const products = [
     isFeatured: true,
     isBestSeller: true,
     tags: ["handcarved", "wall", "art"],
-    images: [
-  "/images/hand-carved-wall-panel.jpg"
-],
+    images: ["/images/hand-carved-wall-panel.jpg"],
     shortDescription: "A stunning hand-carved wall panel made from reclaimed mango wood.",
     description:
       "Each panel is individually carved by our master artisans using traditional East African motifs. Made from sustainably sourced mango wood, no two pieces are identical. Sealed with natural beeswax for durability.",
+    reviewList: [
+      { name: "Amina K.",    rating: 5, date: "2024-02-10", text: "Absolutely breathtaking! Hung it in my living room and everyone who visits asks about it. The carving detail is incredible." },
+      { name: "Peter O.",    rating: 5, date: "2024-01-22", text: "Arrived well packed, no damage. The mango wood grain is gorgeous. Worth every shilling." },
+      { name: "Grace W.",    rating: 4, date: "2023-12-05", text: "Beautiful piece. Took a week to deliver to Kisumu but the quality made the wait worthwhile." },
+    ],
   },
   {
     id: 2,
@@ -34,12 +37,15 @@ const products = [
     isFeatured: true,
     isBestSeller: true,
     tags: ["kitchen", "bowl", "acacia"],
-     images: [
-  "/images/acacia-wood-bowl.jpg"
-],
+    images: ["/images/acacia-wood-bowl.jpg"],
     shortDescription: "Set of 3 hand-turned acacia wood salad bowls.",
     description:
       "Turned on a lathe by skilled craftsmen, these acacia bowls are food-safe and finished with food-grade mineral oil. Perfect for salads, fruits, or as a decorative centerpiece.",
+    reviewList: [
+      { name: "Fatuma A.",   rating: 5, date: "2024-03-01", text: "These bowls are stunning on my dining table. Food-safe finish and easy to clean. My family loves them." },
+      { name: "James M.",    rating: 5, date: "2024-02-14", text: "Bought as a gift for my mum. She was so impressed by the craftsmanship. Will definitely order again." },
+      { name: "Wanjiru N.",  rating: 4, date: "2024-01-30", text: "Great quality. The smallest bowl is a bit shallow but overall very happy with the set." },
+    ],
   },
   {
     id: 3,
@@ -53,12 +59,15 @@ const products = [
     isFeatured: true,
     isBestSeller: false,
     tags: ["furniture", "table", "mahogany"],
-     images: [
-  "/images/mahogany-side-table.jpg"
-],
+    images: ["/images/mahogany-side-table.jpg"],
     shortDescription: "Solid mahogany side table with hand-jointed legs.",
     description:
       "Built using traditional mortise-and-tenon joinery, this solid mahogany side table is designed to last generations. Available in natural or dark walnut finish.",
+    reviewList: [
+      { name: "David K.",    rating: 5, date: "2024-01-18", text: "Solid as a rock. I've had cheap side tables before that wobble — this one doesn't budge. The mahogany finish is rich and warm." },
+      { name: "Lilian T.",   rating: 4, date: "2023-11-29", text: "Exactly as described. Assembly was straightforward. Would have given 5 stars if delivery was faster." },
+      { name: "Samuel O.",   rating: 5, date: "2023-10-14", text: "Premium quality furniture at a fair price. Looks expensive in my bedroom. Very satisfied." },
+    ],
   },
   {
     id: 4,
@@ -72,17 +81,20 @@ const products = [
     isFeatured: false,
     isBestSeller: true,
     tags: ["kitchen", "cheese", "olive"],
-    images: [
-      "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=600",
-    ],
+    images: ["/images/olive-wood-cheeese-board.jpg"],
     shortDescription: "Beautiful olive wood cheese board with natural grain patterns.",
     description:
       "Sourced from old olive trees, each board has a unique grain pattern. Food-safe mineral oil finish. Comes with a small carving knife. Great as a gift.",
+    reviewList: [
+      { name: "Rehema S.",   rating: 5, date: "2024-03-10", text: "The grain pattern on mine is absolutely unique — no two are alike as they say. Perfect for hosting guests." },
+      { name: "Brian N.",    rating: 5, date: "2024-02-27", text: "Bought 3 as gifts. Everyone loved them. The carving knife that comes with it is a nice touch." },
+      { name: "Caroline M.", rating: 5, date: "2024-01-05", text: "Best cheese board I've ever owned. Heavy, sturdy and looks amazing. Worth every cent." },
+    ],
   },
   {
     id: 5,
     name: "Geometric Wall Clock",
-    category: "Wall Décor",
+    category: "Wall Decor",
     price: 8400,
     oldPrice: 9700,
     rating: 4.6,
@@ -91,12 +103,15 @@ const products = [
     isFeatured: false,
     isBestSeller: false,
     tags: ["clock", "wall", "geometric"],
-    images: [
-      "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600",
-    ],
+    images: ["/images/geometric-wall-clock.jpg"],
     shortDescription: "Laser-cut geometric wooden wall clock with silent movement.",
     description:
       "Made from bamboo plywood with a precision laser-cut geometric design. Powered by a silent quartz movement. Battery included. Diameter: 35cm.",
+    reviewList: [
+      { name: "Hana J.",     rating: 5, date: "2024-02-20", text: "This clock completely transformed my office wall. The geometric shadow effect when light hits it is mesmerising." },
+      { name: "Tobias M.",   rating: 4, date: "2024-01-11", text: "Very stylish and the silent mechanism is a huge plus — no ticking noise at night. Loses half a star only for the packaging." },
+      { name: "Aisha B.",    rating: 5, date: "2023-12-22", text: "Got compliments from everyone who saw it. Looks much more expensive than it costs." },
+    ],
   },
   {
     id: 6,
@@ -110,12 +125,15 @@ const products = [
     isFeatured: true,
     isBestSeller: false,
     tags: ["furniture", "chair", "teak"],
-    images: [
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600",
-    ],
+    images: ["/images/teak-dining-chair.jpg"],
     shortDescription: "Solid teak dining chair with woven rattan back.",
     description:
       "A fusion of teak hardwood and hand-woven natural rattan. Weather-resistant and suitable for both indoor and outdoor use. Available in sets of 2 or 4.",
+    reviewList: [
+      { name: "Moses L.",    rating: 5, date: "2024-03-05", text: "Ordered a set of 4 for my dining room. Incredibly sturdy and the rattan back gives it a great look. Guests always ask where I got them." },
+      { name: "Njeri W.",    rating: 5, date: "2024-02-01", text: "We use these on our outdoor patio and they've held up perfectly through rain. The teak is clearly high grade." },
+      { name: "Francis A.",  rating: 4, date: "2023-11-17", text: "Beautiful chairs. The only reason for 4 stars is the delivery took longer than expected but the product itself is flawless." },
+    ],
   },
   {
     id: 7,
@@ -129,17 +147,20 @@ const products = [
     isFeatured: false,
     isBestSeller: true,
     tags: ["kitchen", "spice", "rack"],
-    images: [
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600",
-    ],
+    images: ["/images/wooden-spice-rack.jpg"],
     shortDescription: "Wall-mounted wooden spice rack with 6 glass jars.",
     description:
       "Handmade from pine with a natural oil finish. Comes with 6 glass jars and chalkboard labels. Easy wall-mount installation kit included.",
+    reviewList: [
+      { name: "Mary A.",     rating: 5, date: "2024-03-08", text: "So practical and it looks great on my kitchen wall. The chalkboard labels are a brilliant idea. Installation was quick." },
+      { name: "Kevin O.",    rating: 4, date: "2024-02-16", text: "Solid pine wood and the jars are a good size. Wish it came with more than 6 jars but overall very pleased." },
+      { name: "Priscilla N.",rating: 4, date: "2024-01-09", text: "Exactly what I needed to organise my spices. The wall-mount kit included everything. Took 10 minutes to put up." },
+    ],
   },
   {
     id: 8,
     name: "Abstract Tree Wall Art",
-    category: "Wall Décor",
+    category: "Wall Decor",
     price: 14200,
     oldPrice: 16800,
     rating: 4.8,
@@ -148,12 +169,15 @@ const products = [
     isFeatured: false,
     isBestSeller: false,
     tags: ["wall", "art", "abstract"],
-    images: [
-      "https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=600",
-    ],
+    images: ["/images/abstract-tree-wall-art.jpg"],
     shortDescription: "3D layered abstract tree wall art from birch plywood.",
     description:
       "Multi-layer laser-cut birch plywood tree sculpture. Creates a beautiful shadow effect when light falls on it. Easy to hang — all hardware included. Size: 50cm × 70cm.",
+    reviewList: [
+      { name: "Zawadi T.",   rating: 5, date: "2024-02-25", text: "The shadow effect this creates on the wall at night with a lamp behind it is absolutely magical. A true statement piece." },
+      { name: "Ian R.",      rating: 5, date: "2024-01-30", text: "Bought for my wife's birthday. She was speechless. The layering gives it a real 3D depth. Highly recommend." },
+      { name: "Esther K.",   rating: 4, date: "2023-12-19", text: "Stunning piece. Took about 20 minutes to hang because I wanted to get the position perfect, but it was worth it." },
+    ],
   },
 ];
 

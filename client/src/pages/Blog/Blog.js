@@ -28,7 +28,7 @@ function Blog() {
             <Link to={`/blog/${post.slug}`} className="block overflow-hidden bg-wood-50 dark:bg-dark-surface">
               <div className="aspect-[16/9] overflow-hidden">
                 <img
-                  src={post.image}
+                  src={post.images[0]}
                   alt={post.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"

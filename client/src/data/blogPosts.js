@@ -10,7 +10,7 @@ const blogPosts = [
     author: "Amara Osei",
     category: "Techniques",
     readTime: "5 min read",
-    image: "https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=800",
+    images: ["/images/hand-craving.jpg"],
     content: `
 Wood carving is one of humanity's oldest and most rewarding crafts. Whether you're drawn to the meditative rhythm of a chisel on wood or the satisfaction of transforming a raw block into something beautiful, carving is a skill anyone can learn.
 
@@ -60,7 +60,7 @@ The journey of a thousand carvings begins with a single cut. Happy carving!
     author: "Zawadi Mwangi",
     category: "Sustainability",
     readTime: "4 min read",
-    image: "https://images.unsplash.com/photo-1594938298603-c8148c4b4b2a?w=800",
+    images: ["/images/suitability.jpg"],
     content: `
 At BoraBora Woodcrafts, sustainability isn't a buzzword — it's the foundation of everything we do. Every piece of wood that enters our workshop has a story, and we make sure it's a responsible one.
 
@@ -102,7 +102,7 @@ The wood in your home has roots — and we want those roots to keep growing.
     author: "Fatuma Ali",
     category: "Product Care",
     readTime: "3 min read",
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
+    images: ["/images/wooden-kitchenware.jpg"],
     content: `
 Wooden kitchenware is beautiful, functional, and long-lasting — but only if you care for it properly. With a few simple habits, your BoraBora bowls, boards, and utensils will stay gorgeous for decades.
 

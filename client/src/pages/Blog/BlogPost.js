@@ -113,7 +113,7 @@ function BlogPost() {
       {/* Cover image */}
       <div className="rounded-xl overflow-hidden mb-8 aspect-[16/7] bg-wood-50 dark:bg-dark-surface">
         <img
-          src={post.image}
+          src={post.images[0]}
           alt={post.title}
           className="w-full h-full object-cover"
         />

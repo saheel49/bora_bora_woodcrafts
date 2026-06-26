@@ -103,7 +103,7 @@ function Contact() {
                   {
                     icon: "📞",
                     label: "Phone / WhatsApp",
-                    content: <a href="tel:+254745678901" className="hover:underline dark:text-white/80">+254 745 678 901</a>,
+                    content: <a href="tel:+254713044270" className="hover:underline dark:text-white/80">+254 713044270</a>,
                   },
                   {
                     icon: "📍",

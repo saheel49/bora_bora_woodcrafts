@@ -7,8 +7,8 @@ import { formatPrice } from "../../utils/currency";
 function Cart() {
   const { cart, removeItem, updateQty, subtotal, clearCart } = useCart();
 
-  // Flat-rate shipping: free over KSh 15,000
-  const SHIPPING = subtotal > 0 ? (subtotal >= 15000 ? 0 : 500) : 0;
+  // Shipping is calculated at checkout based on city — show estimate here
+  const SHIPPING = 0; // placeholder, real cost set at checkout
   const total    = subtotal + SHIPPING;
 
   if (cart.length === 0) {
@@ -103,21 +103,11 @@ function Cart() {
               </div>
               <div className="flex justify-between text-wood-600 dark:text-dark-muted">
                 <dt>Shipping</dt>
-                <dd>
-                  {SHIPPING === 0
-                    ? <span className="text-forest font-medium">Free</span>
-                    : formatPrice(SHIPPING)
-                  }
-                </dd>
+                <dd><span className="text-wood-400 dark:text-dark-muted italic">Calculated at checkout</span></dd>
               </div>
-              {SHIPPING > 0 && (
-                <p className="text-xs text-wood-400 dark:text-dark-muted">
-                  Free shipping on orders over KSh 15,000
-                </p>
-              )}
               <div className="flex justify-between font-bold text-wood-700 dark:text-white pt-3 border-t border-wood-100 dark:border-dark-border">
-                <dt>Total</dt>
-                <dd>{formatPrice(total)}</dd>
+                <dt>Subtotal</dt>
+                <dd>{formatPrice(subtotal)}</dd>
               </div>
             </dl>
 

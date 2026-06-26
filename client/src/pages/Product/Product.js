@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import products from "../../data/products";
 import ProductCard from "../../components/ProductCard/ProductCard";
@@ -10,21 +10,31 @@ function Product() {
   const { id }      = useParams();
   const { addItem } = useCart();
 
+  // Scroll to top every time a new product page loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [id]);
+
   const product = products.find((p) => p.id === parseInt(id));
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen]   = useState(false);
   const [activeTab, setActiveTab]         = useState("description");
   const [added, setAdded]                 = useState(false);
 
+  // Reset state whenever product changes
+  useEffect(() => {
+    setSelectedImage(0);
+    setActiveTab("description");
+    setLightboxOpen(false);
+    setAdded(false);
+  }, [id]);
+
   const related = products
     .filter((p) => p.category === product?.category && p.id !== product?.id)
     .slice(0, 4);
 
-  const reviews = [
-    { name: "Amina K.",  rating: 5, text: "Absolutely beautiful! Arrived well packed and looks stunning on my wall.", date: "2024-02-10" },
-    { name: "David M.",  rating: 4, text: "Great quality. The craftsmanship is impressive. Would buy again.",          date: "2024-01-28" },
-    { name: "Zawadi T.", rating: 5, text: "Exactly as described. Fast delivery to Nairobi. Very happy!",              date: "2023-12-15" },
-  ];
+  // Reviews come from the product's own reviewList in products.js
+  const reviews = product.reviewList || [];
 
   if (!product) {
     return (
@@ -162,7 +172,7 @@ function Product() {
                   : "border-transparent text-wood-400 dark:text-dark-muted hover:text-wood-600"
               }`}
             >
-              {tab}
+              {tab === "reviews" ? `Reviews (${reviews.length})` : tab}
             </button>
           ))}
         </div>
