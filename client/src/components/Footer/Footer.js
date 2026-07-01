@@ -34,7 +34,7 @@ function Footer() {
           <h4 className="font-semibold mb-3 text-wood-200">Get in Touch</h4>
           <ul className="text-sm space-y-2 text-wood-100">
             <li>📧 info@boraworkshop.co.ke</li>
-            <li>📞 +254745678901</li>
+            <li>📞 +254737979003</li>
             <li>📍 Mombasa, Kenya</li>
           </ul>
         </div>

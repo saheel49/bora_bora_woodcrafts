@@ -113,11 +113,20 @@ function About() {
             What We Stand For
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map(({ icon, title, desc }) => (
-              <div key={title} className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl p-6 text-center shadow-sm dark:shadow-none">
-                <span className="text-4xl block mb-3">{icon}</span>
-                <h3 className="font-bold text-wood-700 dark:text-white mb-2">{title}</h3>
-                <p className="text-wood-500 dark:text-white/60 text-sm">{desc}</p>
+            {values.map(({ title, desc }, index) => (
+              <div
+                key={title}
+                className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl overflow-hidden text-center shadow-sm dark:shadow-none group transition hover:shadow-md min-h-[22rem]"
+              >
+                <div
+                  className={`banner-slice banner-slice-${index + 1} h-56 overflow-hidden rounded-t-xl transition-transform duration-300 group-hover:scale-105`}
+                  style={{ backgroundImage: "url('/images/about.png')" }}
+                />
+
+                <div className="p-6">
+                  <h3 className="font-bold text-wood-700 dark:text-white mb-2">{title}</h3>
+                  <p className="text-wood-500 dark:text-white/60 text-sm">{desc}</p>
+                </div>
               </div>
             ))}
           </div>

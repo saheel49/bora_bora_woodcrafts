@@ -11,3 +11,34 @@ body {
 .dark body {
   @apply bg-dark-bg text-dark-text;
 }
+
+.banner-slice {
+  background-repeat: no-repeat;
+  background-size: 400% auto;
+  background-position: left center;
+}
+
+.banner-slice-1 {
+  background-position: 0% center;
+}
+
+.banner-slice-2 {
+  background-position: 33.333333% center;
+}
+
+.banner-slice-3 {
+  background-position: 66.666667% center;
+}
+
+.banner-slice-4 {
+  background-position: 100% center;
+}
+
+@media (max-width: 1023px) {
+  .banner-slice {
+    background-size: contain !important;
+    background-position: center center !important;
+    min-height: 12rem;
+  }
+}
+

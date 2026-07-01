@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CartProvider }  from "./context/CartContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
-// Layout
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import Navbar  from "./components/Navbar/Navbar";
 import Footer  from "./components/Footer/Footer";
 
@@ -24,6 +24,7 @@ function App() {
     <ThemeProvider>
       <CartProvider>
         <Router>
+          <ScrollToTop />
           {/* dark: classes apply when <html> has class="dark" */}
           <div className="flex flex-col min-h-screen bg-cream dark:bg-dark-bg transition-colors duration-300">
             <Navbar />
