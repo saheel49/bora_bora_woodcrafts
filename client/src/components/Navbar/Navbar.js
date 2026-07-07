@@ -2,19 +2,20 @@ import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useCart }  from "../../context/CartContext";
 import { useTheme } from "../../context/ThemeContext";
-
+import { useAuth }  from "../../context/AuthContext";
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { totalItems }          = useCart();
   const { isDark, toggleTheme } = useTheme();
+  const { user, isAdmin, logout } = useAuth();
 
   const navLinks = [
     { to: "/",        label: "Home"    },
-    { to: "/shop",    label: "Shop"    },
     { to: "/blog",    label: "Blog"    },
     { to: "/about",   label: "About"   },
     { to: "/contact", label: "Contact" },
+    ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ];
 
   return (
@@ -23,7 +24,7 @@ function Navbar() {
 
         {/* Brand */}
         <Link to="/" className="text-wood-300 font-bold text-xl tracking-wide hover:text-wood-200 transition">
-          🪵 BoraBora Woodcrafts
+          BoraBora Woodcrafts
         </Link>
 
         {/* Desktop nav */}
@@ -58,17 +59,19 @@ function Navbar() {
           </button>
 
           {/* Cart icon with badge */}
-          <Link to="/cart" className="relative text-cream hover:text-wood-300 transition" aria-label="Cart">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 7h12.8M7 13L5.4 5M17 21a1 1 0 100-2 1 1 0 000 2zm-10 0a1 1 0 100-2 1 1 0 000 2z" />
-            </svg>
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-wood-300 text-wood-800 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </Link>
+          {!isAdmin && (
+            <Link to="/cart" className="relative text-cream hover:text-wood-300 transition" aria-label="Cart">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 7h12.8M7 13L5.4 5M17 21a1 1 0 100-2 1 1 0 000 2zm-10 0a1 1 0 100-2 1 1 0 000 2z" />
+              </svg>
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-wood-300 text-wood-800 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+          )}
 
           {/* Account icon */}
           <Link to="/account" className="text-cream hover:text-wood-300 transition" aria-label="Account">
@@ -77,6 +80,18 @@ function Navbar() {
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </Link>
+
+          {/* Logout button — only shown when logged in */}
+          {user && (
+            <button
+              onClick={logout}
+              className="hidden md:flex items-center gap-2 text-xs text-cream/80 hover:text-red-400 transition border border-cream/20 hover:border-red-400/50 rounded px-3 py-1.5"
+              aria-label="Log out"
+            >
+              <span>👤 {user.username}</span>
+              <span className="border-l border-cream/20 pl-2 text-red-400">Logout</span>
+            </button>
+          )}
 
           {/* Mobile menu toggle */}
           <button

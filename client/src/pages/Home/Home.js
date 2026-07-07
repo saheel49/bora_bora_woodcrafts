@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 import products from "../../data/products";
 import ProductCard from "../../components/ProductCard/ProductCard";
 
+const featuredCategories = [
+  { name: "Wall Décor",  image: "/images/wall-decor.jpg",   desc: "Carved panels, clocks, and 3D art." },
+  { name: "Kitchenware", image: "/images/kitchenware.jpg",  desc: "Bowls, boards, and racks for your kitchen." },
+  { name: "Furniture",   image: "/images/furniture.jpg",    desc: "Tables, chairs, and shelves built to last." },
+];
+
 // ─── Homepage ─────────────────────────────────────────────────────────────────
 function Home() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-
-  const categories = [
-    { name: "Wall Décor",  image: "/images/wall-decor.jpg",   desc: "Carved panels, clocks, and 3D art." },
-    { name: "Kitchenware", image: "/images/kitchenware.jpg",  desc: "Bowls, boards, and racks for your kitchen." },
-    { name: "Furniture",   image: "/images/furniture.jpg",    desc: "Tables, chairs, and shelves built to last." },
-  ];
 
   const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
 
@@ -65,7 +65,7 @@ function Home() {
           Shop by Category
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {categories.map((cat) => (
+          {featuredCategories.map((cat) => (
             <Link
               key={cat.name}
               to={`/shop?category=${encodeURIComponent(cat.name)}`}

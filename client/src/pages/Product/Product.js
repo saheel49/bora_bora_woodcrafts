@@ -1,40 +1,179 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import products from "../../data/products";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 import { formatPrice } from "../../utils/currency";
+import api from "../../utils/api";
+
+const LOCAL_PRODUCT_IMAGES = {
+  "Hand-Carved Wall Panel": "/images/hand-carved-wall-panel.jpg",
+  "Acacia Wood Salad Bowl Set": "/images/acacia-wood-bowl.jpg",
+  "Mahogany Side Table": "/images/mahogany-side-table.jpg",
+  "Olive Wood Cheese Board": "/images/olive-wood-cheeese-board.jpg",
+  "Geometric Wall Clock": "/images/geometric-wall-clock.jpg",
+  "Teak Dining Chair": "/images/teak-dining-chair.jpg",
+  "Wooden Spice Rack": "/images/wooden-spice-rack.jpg",
+  "Abstract Tree Wall Art": "/images/abstract-tree-wall-art.jpg",
+};
+
+const getProductImages = (p) => {
+  const validImages = (p.images || []).map((img) => img?.image_url).filter(Boolean);
+  if (validImages.length > 0) return validImages;
+  return [LOCAL_PRODUCT_IMAGES[p.name] || "/images/hand-crafted-wood-art.jpg"];
+};
+
+// ─── Normalise API product → local shape ──────────────────────────────────────
+const normalise = (p) => ({
+  id:               p.id,
+  name:             p.name,
+  category:         p.category?.name || p.category || "",
+  price:            parseFloat(p.price),
+  oldPrice:         p.old_price ? parseFloat(p.old_price) : null,
+  rating:           parseFloat(p.rating) || 0,
+  reviews:          p.review_count || 0,
+  stock:            p.stock,
+  isBestSeller:     p.is_best_seller,
+  images:           getProductImages(p),
+  shortDescription: p.short_description || "",
+  description:      p.description || "",
+  reviewList:       [],
+});
 
 // ─── Product Detail Page ──────────────────────────────────────────────────────
 function Product() {
   const { id }      = useParams();
   const { addItem } = useCart();
+  const { user, isAdmin }    = useAuth();
+  const navigate    = useNavigate();
 
-  // Scroll to top every time a new product page loads
+  const [product, setProduct]   = useState(null);
+  const [related, setRelated]   = useState([]);
+  const [reviews, setReviews]   = useState([]);
+  const [existingReview, setExistingReview] = useState(null);
+  const [loading, setLoading]   = useState(true);
+
+  const [selectedImage, setSelectedImage]         = useState(0);
+  const [lightboxOpen, setLightboxOpen]           = useState(false);
+  const [activeTab, setActiveTab]                 = useState("description");
+  const [added, setAdded]                         = useState(false);
+  const [inWishlist, setInWishlist]               = useState(false);
+  const [wishlistLoading, setWishlistLoading]     = useState(false);
+  const [reviewForm, setReviewForm]               = useState({ rating: 5, text: "" });
+  const [reviewSubmitting, setReviewSubmitting]   = useState(false);
+  const [reviewError, setReviewError]             = useState("");
+
+  // Scroll to top on id change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, [id]);
-
-  const product = products.find((p) => p.id === parseInt(id));
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [lightboxOpen, setLightboxOpen]   = useState(false);
-  const [activeTab, setActiveTab]         = useState("description");
-  const [added, setAdded]                 = useState(false);
-
-  // Reset state whenever product changes
-  useEffect(() => {
     setSelectedImage(0);
     setActiveTab("description");
     setLightboxOpen(false);
     setAdded(false);
+    setInWishlist(false);
   }, [id]);
 
-  const related = products
-    .filter((p) => p.category === product?.category && p.id !== product?.id)
-    .slice(0, 4);
+  // Fetch product + reviews + related from API
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      api.get(`/products/${id}/`),
+      api.get(`/reviews/products/${id}/`),
+    ])
+      .then(([prodRes, revRes]) => {
+        const p = normalise(prodRes.data);
+        setProduct(p);
+        const revData = Array.isArray(revRes.data) ? revRes.data : (revRes.data.results || []);
+        setReviews(revData);
+        const currentReview = user ? revData.find((r) => r.author_id === user.id) : null;
+        setExistingReview(currentReview || null);
+        // Fetch related: same category
+        return api.get(`/products/?page_size=20`);
+      })
+      .then((r) => {
+        const all = Array.isArray(r.data) ? r.data : (r.data.results || []);
+        setRelated(
+          all
+            .filter((p) => p.id !== parseInt(id))
+            .slice(0, 4)
+            .map(normalise)
+        );
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  // Reviews come from the product's own reviewList in products.js
-  const reviews = product.reviewList || [];
+  useEffect(() => {
+    if (!user) {
+      setExistingReview(null);
+      return;
+    }
+    const currentReview = reviews.find((r) => r.author_id === user.id);
+    setExistingReview(currentReview || null);
+    if (currentReview) {
+      setReviewForm({ rating: currentReview.rating, text: currentReview.text });
+    }
+  }, [user, reviews]);
+
+  // Check wishlist
+  useEffect(() => {
+    if (!user || !id) return;
+    api.get("/wishlist/")
+      .then((r) => {
+        const data = Array.isArray(r.data) ? r.data : (r.data.results || []);
+        setInWishlist(data.some((w) => w.product?.id === parseInt(id)));
+      })
+      .catch(() => {});
+  }, [user, id]);
+
+  const handleWishlist = async () => {
+    if (!user) { navigate("/account"); return; }
+    setWishlistLoading(true);
+    try {
+      if (inWishlist) {
+        await api.delete(`/wishlist/${id}/`);
+        setInWishlist(false);
+      } else {
+        await api.post(`/wishlist/${id}/`);
+        setInWishlist(true);
+      }
+    } catch { alert("Failed to update wishlist."); }
+    setWishlistLoading(false);
+  };
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    if (!user) { navigate("/account"); return; }
+    setReviewSubmitting(true);
+    setReviewError("");
+    try {
+      const { data } = existingReview
+        ? await api.put(`/reviews/products/${id}/`, reviewForm)
+        : await api.post(`/reviews/products/${id}/`, reviewForm);
+      setReviews((prev) => existingReview ? prev.map((r) => (r.id === data.id ? data : r)) : [data, ...prev]);
+      setExistingReview(data);
+      setReviewForm(existingReview ? { rating: data.rating, text: data.text } : { rating: 5, text: "" });
+    } catch (err) {
+      setReviewError(err.response?.data?.error || err.response?.data?.detail || "Failed to submit review.");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 animate-pulse">
+          <div className="aspect-[4/3] bg-wood-100 dark:bg-white/10 rounded-xl" />
+          <div className="space-y-4">
+            <div className="h-6 bg-wood-100 dark:bg-white/10 rounded w-1/3" />
+            <div className="h-8 bg-wood-100 dark:bg-white/10 rounded w-3/4" />
+            <div className="h-6 bg-wood-100 dark:bg-white/10 rounded w-1/4" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -46,6 +185,7 @@ function Product() {
   }
 
   const handleAddToCart = () => {
+    if (isAdmin) return;
     addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -53,7 +193,7 @@ function Product() {
 
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={i < rating ? "text-wood-400" : "text-gray-300"}>★</span>
+      <span key={i} className={i < Math.round(rating) ? "text-wood-400" : "text-gray-300"}>★</span>
     ));
 
   return (
@@ -135,6 +275,12 @@ function Product() {
 
           <p className="text-wood-500 dark:text-dark-muted mb-6 leading-relaxed">{product.shortDescription}</p>
 
+          {isAdmin && (
+            <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-4 text-sm text-amber-900 dark:text-amber-200">
+              Admin accounts cannot purchase products. Please use the admin dashboard to manage the store.
+            </div>
+          )}
+
           <p className="text-sm mb-5">
             {product.stock > 5
               ? <span className="text-forest">✅ In Stock ({product.stock} available)</span>
@@ -144,19 +290,36 @@ function Product() {
 
           <button
             onClick={handleAddToCart}
+            disabled={isAdmin}
             className={`w-full py-3 rounded-lg font-bold text-base transition ${
-              added
+              isAdmin
+                ? "bg-wood-100 dark:bg-white/10 text-wood-500 dark:text-wood-400 cursor-not-allowed"
+                : added
                 ? "bg-forest text-white"
                 : "bg-wood-700 dark:bg-wood-600 text-cream hover:bg-wood-600 dark:hover:bg-wood-500"
             }`}
           >
-            {added ? "✓ Added to Cart!" : "Add to Cart"}
+            {isAdmin ? "Admin cannot purchase" : added ? "✓ Added to Cart!" : "Add to Cart"}
           </button>
 
-          <button className="w-full mt-3 py-2.5 rounded-lg border border-wood-300 dark:border-dark-border text-wood-600 dark:text-dark-muted text-sm hover:bg-wood-50 dark:hover:bg-dark-surface transition">
-            ♡ Add to Wishlist
-          </button>
-        </div>
+          <button
+            onClick={handleWishlist}
+            disabled={wishlistLoading}
+            className={`w-full mt-3 py-2.5 rounded-lg border text-sm transition font-medium ${
+              inWishlist
+                ? "border-red-300 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100"
+                : "border-wood-300 dark:border-dark-border text-wood-600 dark:text-dark-muted hover:bg-wood-50 dark:hover:bg-dark-surface"
+            }`}
+          >
+            {wishlistLoading
+              ? "..."
+              : inWishlist
+              ? "♥ Remove from Wishlist"
+              : user
+              ? "♡ Add to Wishlist"
+              : "♡ Add to Wishlist (Login required)"
+            }
+          </button>        </div>
       </div>
 
       {/* Tabs */}
@@ -172,8 +335,7 @@ function Product() {
                   : "border-transparent text-wood-400 dark:text-dark-muted hover:text-wood-600"
               }`}
             >
-              {tab === "reviews" ? `Reviews (${reviews.length})` : tab}
-            </button>
+              {tab === "reviews" ? `Reviews (${reviews.length})` : tab}            </button>
           ))}
         </div>
 
@@ -183,16 +345,62 @@ function Product() {
 
         {activeTab === "reviews" && (
           <div className="space-y-5 max-w-2xl">
-            {reviews.map((r, i) => (
-              <div key={i} className="bg-white dark:bg-dark-card rounded-xl p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-wood-700 dark:text-white">{r.name}</span>
-                  <span className="text-xs text-wood-400 dark:text-dark-muted">{r.date}</span>
+            {reviews.length === 0 ? (
+              <p className="text-wood-400 dark:text-dark-muted">No reviews yet. Be the first!</p>
+            ) : (
+              reviews.map((r, i) => (
+                <div key={i} className="bg-white dark:bg-dark-card rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-wood-700 dark:text-white">{r.author_name || r.name}</span>
+                    <span className="text-xs text-wood-400 dark:text-dark-muted">
+                      {r.created_at ? new Date(r.created_at).toLocaleDateString("en-KE") : r.date}
+                    </span>
+                  </div>
+                  <div className="flex text-base mb-2">{renderStars(r.rating)}</div>
+                  <p className="text-wood-500 dark:text-dark-muted text-sm">{r.text}</p>
                 </div>
-                <div className="flex text-base mb-2">{renderStars(r.rating)}</div>
-                <p className="text-wood-500 dark:text-dark-muted text-sm">{r.text}</p>
-              </div>
-            ))}
+              ))
+            )}
+
+            <div className="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm">
+              <h3 className="text-lg font-semibold text-wood-700 dark:text-white mb-3">Share your review</h3>
+              {existingReview && (
+                <p className="text-sm text-wood-500 dark:text-dark-muted mb-3">
+                  You already have a review for this product. Submit again to update it.
+                </p>
+              )}
+              {reviewError && <p className="text-sm text-red-500 mb-3">{reviewError}</p>}
+              {!user ? (
+                <p className="text-wood-500 dark:text-dark-muted">
+                  Please <button type="button" onClick={() => navigate("/account")}
+                    className="underline text-wood-700 dark:text-white">log in</button> to leave a review.
+                </p>
+              ) : (
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-wood-700 dark:text-white mb-2">Rating</label>
+                    <select value={reviewForm.rating} onChange={(e) => setReviewForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
+                      className="w-full border border-wood-200 dark:border-white/20 dark:bg-dark-surface dark:text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wood-400">
+                      {[5,4,3,2,1].map((stars) => (
+                        <option key={stars} value={stars}>{stars} star{stars > 1 ? "s" : ""}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-wood-700 dark:text-white mb-2">Review</label>
+                    <textarea rows={4} required value={reviewForm.text}
+                      onChange={(e) => setReviewForm((prev) => ({ ...prev, text: e.target.value }))}
+                      className="w-full border border-wood-200 dark:border-white/20 dark:bg-dark-surface dark:text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-wood-400"
+                      placeholder="Write what you liked about the product..."
+                    />
+                  </div>
+                  <button type="submit" disabled={reviewSubmitting}
+                    className="bg-wood-700 dark:bg-white text-cream dark:text-black px-5 py-2 rounded-lg font-semibold hover:bg-wood-600 transition">
+                    {reviewSubmitting ? "Submitting..." : existingReview ? "Update Review" : "Submit Review"}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         )}
       </div>

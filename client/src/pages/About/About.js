@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import products from "../../data/products";
 
@@ -6,12 +6,17 @@ import products from "../../data/products";
 function About() {
   const [selectedMember, setSelectedMember] = useState(null);
   const navigate = useNavigate();
+  const worksRef = useRef(null);
+
+  const scrollToWorks = () => {
+    worksRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const values = [
-    { icon: "🌿", title: "Sustainability",   desc: "We only source timber from responsibly managed forests, and plant a tree for every 10 sold." },
-    { icon: "🤝", title: "Community",        desc: "We employ and train over 30 local artisans in Nairobi, creating livelihoods that matter." },
-    { icon: "✨", title: "Quality",          desc: "Each item is hand-finished and inspected before it ever leaves our workshop." },
-    { icon: "🌍", title: "African Heritage", desc: "Our designs draw from generations of East African craft traditions." },
+    {  title: "Sustainability",   desc: "We only source timber from responsibly managed forests, and plant a tree for every 10 sold." },
+    {  title: "Community",        desc: "We employ and train over 30 local artisans in Nairobi, creating livelihoods that matter." },
+    { title: "Quality",          desc: "Each item is hand-finished and inspected before it ever leaves our workshop." },
+    {  title: "African Heritage", desc: "Our designs draw from generations of East African craft traditions." },
   ];
 
   const team = [
@@ -134,27 +139,42 @@ function About() {
       </section>
 
       {/* ── Team ─────────────────────────────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-4 py-14" aria-labelledby="team-heading">
-        <h2 id="team-heading" className="text-2xl font-bold text-wood-700 dark:text-white text-center mb-2">
-          Meet the Team
-        </h2>
-        <p className="text-center text-wood-500 dark:text-white/50 text-sm mb-10">
-          Click a team member to learn more about them.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <section className="max-w-6xl mx-auto px-4 py-16" aria-labelledby="team-heading">
+        <div className="text-center mb-12">
+          <h2 id="team-heading" className="text-3xl sm:text-4xl font-extrabold text-wood-800 dark:text-white mb-3">
+            Meet the Team
+          </h2>
+          <p className="mx-auto max-w-2xl text-wood-500 dark:text-white/60 text-sm sm:text-base">
+            Our artisans and makers bring every product to life with care, craft, and attention to detail.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {team.map(({ name, role }, i) => (
             <button
               key={name}
               onClick={() => setSelectedMember(team[i])}
-              className="bg-white dark:bg-white/5 dark:border dark:border-white/10 rounded-xl p-6 text-center shadow-sm dark:shadow-none hover:shadow-md dark:hover:bg-white/10 transition cursor-pointer group focus:outline-none focus:ring-2 focus:ring-wood-400"
+              className="relative overflow-hidden rounded-[28px] bg-white/90 dark:bg-slate-950/80 border border-wood-100 dark:border-white/10 p-6 text-left shadow-lg shadow-wood-200/60 dark:shadow-black/30 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-wood-300"
               aria-label={`View ${name}'s profile`}
             >
-              <div className={`${avatarColors[i]} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform`}>
-                <span className="text-white font-bold text-xl">{getInitials(name)}</span>
+              <div className="absolute -left-6 top-14 h-16 w-16 rounded-full bg-amber-200/60 dark:bg-wood-600/20 blur-3xl" />
+              <div className="absolute -right-8 bottom-10 h-20 w-20 rounded-full bg-forest/20 blur-3xl" />
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-300 via-forest to-wood-500" />
+              <div className="relative flex items-center gap-4 mb-5">
+                <div className={`${avatarColors[i]} w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold shadow-inner`}>
+                  {getInitials(name)}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-wood-800 dark:text-white">{name}</h3>
+                  <p className="text-sm text-wood-500 dark:text-white/60">{role}</p>
+                </div>
               </div>
-              <h3 className="font-bold text-wood-700 dark:text-white">{name}</h3>
-              <p className="text-wood-400 dark:text-white/50 text-sm mt-1">{role}</p>
-              <p className="text-xs text-wood-300 dark:text-white/30 mt-2">View profile →</p>
+              <p className="text-sm text-wood-500 dark:text-white/60 leading-relaxed mb-6">
+                {`Click to learn more about ${name} and their craftsmanship.`}
+              </p>
+              <div className="inline-flex items-center gap-2 text-sm font-medium text-wood-700 dark:text-white">
+                <span>View profile</span>
+                <span aria-hidden="true">→</span>
+              </div>
             </button>
           ))}
         </div>
@@ -176,75 +196,113 @@ function About() {
       {/* ── Team Member Modal ─────────────────────────────────────────────── */}
       {selectedMember && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setSelectedMember(null)}
           role="dialog"
           aria-modal="true"
           aria-label={`${selectedMember.name}'s profile`}
         >
           <div
-            className="bg-white dark:bg-dark-card rounded-2xl shadow-2xl max-w-md w-full p-8 relative max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[32px] border border-white/15 bg-white dark:bg-slate-950 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close */}
+            {/* Close button */}
             <button
               onClick={() => setSelectedMember(null)}
-              className="absolute top-4 right-4 text-wood-400 hover:text-wood-700 dark:text-white/50 dark:hover:text-white text-xl transition"
+              className="sticky top-4 right-4 z-20 float-right flex h-12 w-12 items-center justify-center rounded-full border border-wood-200 dark:border-white/20 bg-white/90 dark:bg-slate-900/90 text-wood-700 dark:text-white shadow-md transition hover:bg-wood-50 dark:hover:bg-slate-800"
               aria-label="Close"
             >
-              ✕
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
 
-            {/* Avatar */}
-            <div className={`${avatarColors[team.findIndex(m => m.name === selectedMember.name)]} w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4`}>
-              <span className="text-white font-bold text-2xl">{getInitials(selectedMember.name)}</span>
+            {/* Header with Avatar and Name */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-wood-50 to-amber-50 dark:from-slate-900 dark:to-slate-950 px-8 pt-12 pb-8">
+              <div className="absolute top-0 right-0 h-40 w-40 bg-wood-100/40 dark:bg-wood-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+              <div className="absolute bottom-0 left-0 h-32 w-32 bg-forest/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
+              
+              <div className="relative flex items-end gap-6">
+                <div className={`${avatarColors[team.findIndex((m) => m.name === selectedMember.name)]} flex h-32 w-32 items-center justify-center rounded-full shadow-[0_32px_80px_-30px_rgba(0,0,0,0.5)]`}>
+                  <span className="text-5xl font-bold text-white">{getInitials(selectedMember.name)}</span>
+                </div>
+                <div className="flex-1 pb-2">
+                  <p className="text-xs uppercase tracking-[0.3em] text-wood-600 dark:text-wood-400 font-semibold mb-2">Craft Member</p>
+                  <h1 className="text-4xl font-bold text-wood-900 dark:text-white mb-2">{selectedMember.name}</h1>
+                  <p className="text-lg font-semibold text-wood-700 dark:text-wood-300">{selectedMember.role}</p>
+                </div>
+              </div>
             </div>
 
-            {/* Name + role */}
-            <h2 className="text-xl font-bold text-wood-700 dark:text-white text-center">{selectedMember.name}</h2>
-            <p className="text-wood-400 dark:text-white/50 text-sm text-center mb-1">{selectedMember.role}</p>
-
-            {/* Meta */}
-            <div className="flex justify-center gap-4 text-xs text-wood-400 dark:text-white/40 mb-5">
-              <span>📍 {selectedMember.location}</span>
-              <span>🗓 Since {selectedMember.joined}</span>
+            {/* Info Pills */}
+            <div className="flex flex-wrap gap-3 px-8 py-6 border-b border-wood-100 dark:border-white/10">
+              <div className="rounded-full border border-wood-200 dark:border-white/20 bg-wood-50 dark:bg-slate-900/80 px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-wood-600 dark:text-wood-400 font-semibold mb-1">Location</p>
+                <p className="text-sm font-semibold text-wood-900 dark:text-white">{selectedMember.location}</p>
+              </div>
+              <div className="rounded-full border border-wood-200 dark:border-white/20 bg-wood-50 dark:bg-slate-900/80 px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-wood-600 dark:text-wood-400 font-semibold mb-1">Joined</p>
+                <p className="text-sm font-semibold text-wood-900 dark:text-white">{selectedMember.joined}</p>
+              </div>
+              <div className="rounded-full border border-amber-200 dark:border-amber-600/40 bg-amber-50 dark:bg-amber-950/30 px-5 py-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-amber-700 dark:text-amber-400 font-semibold mb-1">Signature Works</p>
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{selectedMember.bestWorks.length} pieces</p>
+              </div>
             </div>
 
             {/* Bio */}
-            <p className="text-wood-500 dark:text-white/70 text-sm leading-relaxed mb-5">
-              {selectedMember.bio}
-            </p>
+            <div className="px-8 py-8 border-b border-wood-100 dark:border-white/10">
+              <p className="text-base leading-8 text-wood-600 dark:text-white/80">{selectedMember.bio}</p>
+            </div>
 
-            {/* Best works — each is clickable and leads to the product page */}
-            <div>
-              <h3 className="text-xs font-semibold text-wood-600 dark:text-white/60 uppercase tracking-wide mb-3">
-                Best Works — click to view product
-              </h3>
-              <ul className="space-y-2">
+            {/* Best Works Section */}
+            <div ref={worksRef} className="px-8 py-8">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-wood-900 dark:text-white">Best Works</h2>
+                  <p className="text-xs uppercase tracking-[0.24em] text-wood-600 dark:text-wood-400 font-semibold mt-1">Explore featured pieces</p>
+                </div>
+              </div>
+              <div className="grid gap-3">
                 {selectedMember.bestWorks.map((work) => {
                   const match = products.find(
                     (p) => p.name.toLowerCase() === work.toLowerCase()
                   );
                   return (
-                    <li key={work}>
-                      <button
-                        onClick={() => handleWorkClick(work)}
-                        className="w-full text-left flex items-center gap-2 text-sm text-wood-600 dark:text-white/70 hover:text-wood-800 dark:hover:text-white group transition"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-wood-400 dark:bg-wood-300 inline-block flex-shrink-0" />
-                        <span className="underline underline-offset-2 decoration-dotted group-hover:decoration-solid">
-                          {work}
-                        </span>
-                        {match && (
-                          <span className="ml-auto text-xs text-wood-300 dark:text-white/30 group-hover:text-wood-500 dark:group-hover:text-white/60">
-                            View →
+                    <button
+                      key={work}
+                      onClick={() => handleWorkClick(work)}
+                      className="group relative overflow-hidden rounded-[20px] border border-wood-100 dark:border-white/10 bg-white dark:bg-slate-900/80 px-6 py-5 text-left transition hover:border-wood-300 dark:hover:border-white/20 hover:bg-wood-50 dark:hover:bg-slate-800"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-wood-900 dark:text-white text-lg">{work}</p>
+                        </div>
+                        {match ? (
+                          <span className="inline-flex items-center gap-2 rounded-full bg-wood-100 dark:bg-wood-900/60 px-4 py-2 text-sm font-semibold text-wood-700 dark:text-wood-300 group-hover:bg-wood-200 dark:group-hover:bg-wood-800 transition">
+                            View <span className="group-hover:translate-x-1 transition">→</span>
                           </span>
+                        ) : (
+                          <span className="text-sm font-semibold text-wood-400 dark:text-white/40">Unavailable</span>
                         )}
-                      </button>
-                    </li>
+                      </div>
+                    </button>
                   );
                 })}
-              </ul>
+              </div>
+            </div>
+
+            {/* Scroll to Works Button */}
+            <div className="sticky bottom-0 left-0 right-0 flex justify-center py-4 bg-gradient-to-t from-white dark:from-slate-950 to-transparent">
+              <button
+                onClick={scrollToWorks}
+                className="flex items-center gap-2 rounded-full border border-wood-300 dark:border-white/20 bg-wood-50 dark:bg-slate-900 px-5 py-3 text-sm font-semibold text-wood-700 dark:text-white shadow-md transition hover:border-wood-400 hover:bg-wood-100 dark:hover:border-white/40 dark:hover:bg-slate-800"
+              >
+                <span>Scroll to works</span>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>

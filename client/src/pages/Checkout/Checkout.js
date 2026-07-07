@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { formatPrice } from "../../utils/currency";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../utils/api";
 
 // ─── Shipping Rates (KSh) per city ────────────────────────────────────────────
 // Rates are approximate based on distance from Mombasa workshop
@@ -46,7 +48,11 @@ const SHIPPING_DATA = {
 // ─── Checkout Page ────────────────────────────────────────────────────────────
 function Checkout() {
   const { cart, subtotal, clearCart } = useCart();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const cartItems = Array.isArray(cart) ? cart : [];
+  const safeSubtotal = Number(subtotal || 0);
 
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "",
@@ -55,21 +61,36 @@ function Checkout() {
     city: "Nairobi",
   });
 
+  // Auto-fill from logged-in user profile
+  useEffect(() => {
+    if (user) {
+      setForm((prev) => ({
+        ...prev,
+        firstName: user.first_name  || prev.firstName,
+        lastName:  user.last_name   || prev.lastName,
+        email:     user.email       || prev.email,
+        phone:     user.phone       || prev.phone,
+      }));
+    }
+  }, [user]);
+
   const [paymentMethod, setPaymentMethod] = useState("mpesa");
   const [mpesaPhone, setMpesaPhone]       = useState("");
   const [orderPlaced, setOrderPlaced]     = useState(false);
 
+  useEffect(() => {
+    if (isAdmin) navigate("/admin");
+  }, [isAdmin, navigate]);
+
   // Cities available for the selected country
-  const availableCities = useMemo(() => {
-    return Object.keys(SHIPPING_DATA[form.country]?.cities || {});
-  }, [form.country]);
+  const availableCities = Object.keys(SHIPPING_DATA[form.country]?.cities || {});
 
   // Shipping cost based on selected city
-  const shippingCost = useMemo(() => {
-    return SHIPPING_DATA[form.country]?.cities[form.city] ?? 500;
-  }, [form.country, form.city]);
+  const shippingCost = SHIPPING_DATA[form.country]?.cities[form.city] ?? 500;
 
-  const total = subtotal + shippingCost;
+  const total = safeSubtotal + shippingCost;
+
+  if (isAdmin) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,17 +103,41 @@ function Checkout() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: POST order to backend  →  POST /api/orders
-    // Backend will send order receipt email to saheelamir49@gmail.com via Nodemailer + Gmail SMTP
-    console.log("Order placed:", { form, cart, paymentMethod, shippingCost, total });
-    clearCart();
-    setOrderPlaced(true);
-    setTimeout(() => navigate("/account"), 4000);
+
+    try {
+      // POST order to Django backend — triggers email to saheelamir49@gmail.com
+      await api.post("/orders/", {
+        first_name: form.firstName,
+        last_name: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        country: form.country,
+        payment_method: paymentMethod,
+        subtotal: Number(safeSubtotal.toFixed(2)),
+        shipping_cost: Number(shippingCost.toFixed(2)),
+        total: Number(total.toFixed(2)),
+        items: cartItems.map((item) => ({
+          product_id: item.id,
+          name:       item.name,
+          price:      Number(item.price.toFixed(2)),
+          quantity:   item.quantity,
+        })),
+      });
+      clearCart();
+      setOrderPlaced(true);
+      setTimeout(() => navigate("/account"), 4000);
+    } catch (err) {
+      console.error("Order failed:", err);
+      const serverMessage = err?.response?.data ? JSON.stringify(err.response.data) : "";
+      alert(serverMessage || "Failed to place order. Please try again.");
+    }
   };
 
-  if (cart.length === 0 && !orderPlaced) {
+  if (cartItems.length === 0 && !orderPlaced) {
     return (
       <div className="text-center py-20">
         <p className="text-wood-500 dark:text-dark-muted text-lg">No items to checkout.</p>
@@ -120,6 +165,7 @@ function Checkout() {
     );
   }
 
+
   // Shared input/select class
   const fieldClass =
     "w-full border border-wood-200 dark:border-dark-border dark:bg-dark-surface dark:text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-wood-400";
@@ -143,8 +189,8 @@ function Checkout() {
 
               {/* First + Last name */}
               {[
-                { name: "firstName", label: "First Name", type: "text",  placeholder: "Jane"            },
-                { name: "lastName",  label: "Last Name",  type: "text",  placeholder: "Wanjiku"         },
+                { name: "firstName", label: "First Name", type: "text", placeholder: "Jane" },
+                { name: "lastName",  label: "Last Name",  type: "text", placeholder: "Wanjiku" },
               ].map(({ name, label, type, placeholder }) => (
                 <div key={name}>
                   <label htmlFor={name} className="block text-sm font-medium text-wood-700 dark:text-white mb-1">{label}</label>
@@ -259,7 +305,7 @@ function Checkout() {
             <h2 className="text-lg font-bold text-wood-700 dark:text-white mb-4">Order Summary</h2>
 
             <ul className="space-y-2 mb-4">
-              {cart.map((item) => (
+              {cartItems.map((item) => (
                 <li key={item.id} className="flex justify-between text-sm text-wood-600 dark:text-dark-muted">
                   <span className="line-clamp-1 flex-1">{item.name} × {item.quantity}</span>
                   <span className="ml-2 font-medium">{formatPrice(item.price * item.quantity)}</span>
@@ -270,7 +316,7 @@ function Checkout() {
             <dl className="text-sm border-t border-wood-100 dark:border-dark-border pt-3 space-y-2">
               <div className="flex justify-between text-wood-600 dark:text-dark-muted">
                 <dt>Subtotal</dt>
-                <dd>{formatPrice(subtotal)}</dd>
+                <dd>{formatPrice(safeSubtotal)}</dd>
               </div>
               <div className="flex justify-between text-wood-600 dark:text-dark-muted">
                 <dt>Shipping ({form.city})</dt>

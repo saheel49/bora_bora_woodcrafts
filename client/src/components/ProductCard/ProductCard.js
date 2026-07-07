@@ -1,11 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 import { formatPrice } from "../../utils/currency";
 
 // ─── ProductCard ──────────────────────────────────────────────────────────────
 function ProductCard({ product }) {
   const { addItem } = useCart();
+  const { isAdmin } = useAuth();
 
   const renderStars = (rating) =>
     Array.from({ length: 5 }, (_, i) => (
@@ -56,12 +58,18 @@ function ProductCard({ product }) {
             )}
           </div>
 
-          <button
-            onClick={() => addItem(product)}
-            className="w-full bg-wood-700 dark:bg-wood-600 text-cream py-2 rounded-lg hover:bg-wood-600 dark:hover:bg-wood-500 transition font-medium text-sm"
-          >
-            Add to Cart
-          </button>
+          {!isAdmin ? (
+            <button
+              onClick={() => addItem(product)}
+              className="w-full bg-wood-700 dark:bg-wood-600 text-cream py-2 rounded-lg hover:bg-wood-600 dark:hover:bg-wood-500 transition font-medium text-sm"
+            >
+              Add to Cart
+            </button>
+          ) : (
+            <div className="w-full py-2 rounded-lg border border-wood-200 dark:border-dark-border text-center text-sm text-wood-500 dark:text-dark-muted">
+              Admins cannot add products to cart
+            </div>
+          )}
         </div>
       </div>
     </article>

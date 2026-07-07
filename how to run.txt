@@ -1,2 +1,100 @@
-cd "C:\Users\Administrator\Desktop\SWAHILI POT\BoraBora_woodcrafts\client"
-npm start
+═══════════════════════════════════════════════════
+  BoraBora Woodcrafts — How to Run
+═══════════════════════════════════════════════════
+
+IMPORTANT: You are using Git Bash (MINGW64).
+Use the Git Bash commands below — NOT PowerShell ones.
+
+
+STEP 1 — INSTALL PYTHON (do this first, only once)
+────────────────────────────────────────────────────
+1. Go to: https://www.python.org/downloads/
+2. Download the latest Python 3.x Windows installer
+3. Run the installer
+   ⚠️  VERY IMPORTANT: Tick the box "Add Python to PATH" 
+       before clicking Install
+4. After install, CLOSE all terminals and open a new one
+5. Verify it worked by typing:
+      python --version
+   You should see something like: Python 3.12.x
+
+
+STEP 2 — SET UP DJANGO BACKEND (do this once)
+──────────────────────────────────────────────
+Open Git Bash and run these one at a time:
+
+   cd ~/Desktop/SWAHILI\ POT/BoraBora_woodcrafts/backend
+
+   python -m venv venv
+
+   source venv/Scripts/activate
+
+   pip install -r requirements.txt
+
+   python manage.py migrate
+
+   python create_admin.py
+
+This creates your admin account:
+   Email:    saheelamir49@gmail.com
+   Password: Saheel@2026
+
+
+STEP 3 — GMAIL APP PASSWORD (do this once)
+───────────────────────────────────────────
+1. Go to: https://myaccount.google.com/apppasswords
+   (You must have 2-Step Verification turned on)
+2. Create an app password — select "Mail"
+3. Copy the 16-character password it gives you
+4. Open the file:
+      backend/.env
+5. Find the line:
+      EMAIL_HOST_PASSWORD=your-gmail-app-password-here
+   Replace it with your actual password, e.g.:
+      EMAIL_HOST_PASSWORD=abcd efgh ijkl mnop
+
+
+STEP 4 — INSTALL REACT (do this once)
+────────────────────────────────────────
+Open a new Git Bash terminal:
+
+   cd ~/Desktop/SWAHILI\ POT/BoraBora_woodcrafts/client
+   npm install
+
+
+══════════════════════════════════════════════════
+  EVERY TIME YOU WANT TO RUN THE SITE
+══════════════════════════════════════════════════
+
+Open TWO Git Bash terminals side by side:
+
+── Terminal 1 — Django backend ──
+   cd ~/Desktop/SWAHILI\ POT/BoraBora_woodcrafts/backend
+   source venv/Scripts/activate
+   python manage.py runserver
+
+── Terminal 2 — React frontend ──
+   cd ~/Desktop/SWAHILI\ POT/BoraBora_woodcrafts/client
+   npm start
+
+
+OPEN IN BROWSER
+────────────────
+   Website:       http://localhost:3000
+   Django Admin:  http://localhost:8000/admin
+   Admin login:   saheelamir49@gmail.com / Saheel@2026
+
+
+ERRORS THAT ARE SAFE TO IGNORE
+────────────────────────────────
+   Watchpack Error EINVAL lstat pagefile.sys  → harmless, ignore
+   DeprecationWarning fs.F_OK                 → harmless, ignore
+
+
+USEFUL COMMANDS
+────────────────
+   After changing any Django model, run:
+      python manage.py makemigrations
+      python manage.py migrate
+
+═══════════════════════════════════════════════════

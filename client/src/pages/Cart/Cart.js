@@ -1,11 +1,20 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 import { formatPrice } from "../../utils/currency";
 
 // ─── Cart Page ────────────────────────────────────────────────────────────────
 function Cart() {
   const { cart, removeItem, updateQty, subtotal, clearCart } = useCart();
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAdmin) navigate("/admin");
+  }, [isAdmin, navigate]);
+
+  if (isAdmin) return null;
 
   // Shipping is calculated at checkout based on city — show estimate here
   const SHIPPING = 0; // placeholder, real cost set at checkout

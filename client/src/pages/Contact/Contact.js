@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../../utils/api";
 
 // ─── Contact Page ─────────────────────────────────────────────────────────────
 function Contact() {
@@ -7,11 +8,14 @@ function Contact() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: wire up to POST /api/contact on the backend
-    console.log("Contact form submitted:", form);
-    setSubmitted(true);
+    try {
+      await api.post("/contact/", form);
+      setSubmitted(true);
+    } catch {
+      alert("Failed to send message. Please try again.");
+    }
   };
 
   // Shared input class — dark mode: black bg, white text, white border
